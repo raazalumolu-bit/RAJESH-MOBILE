@@ -683,6 +683,7 @@
 const ICONS = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/></svg>',
   wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg>',
+  payments: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 10h18M6 6h12a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M7 15h4"/></svg>',
   stock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.4 11.6a2 2 0 002 1.6h7.2a2 2 0 002-1.6L21 8H6"/></svg>',
   truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>',
@@ -730,6 +731,8 @@ let stockCategoryFilter = 'All';
 let billingCategoryFilter = 'All';
 let jobCards = [];
 let jobStatusFilter = 'Active';
+let paymentsFilterFrom = '';
+let paymentsFilterTo = '';
 
 const STORAGE_KEY_PRODUCTS = 'shop:products';
 const STORAGE_KEY_SALES = 'shop:sales';
@@ -1395,6 +1398,7 @@ function buildTabbar(){
   ];
   if(isOwner()) tabs.push({id:'purchases', label:'Purchases', icon:'truck'});
   tabs.push({id:'sales', label:'Sales', icon:'list'});
+  if(isOwner()) tabs.push({id:'payments', label:'Payments', icon:'payments'});
   tabbar.innerHTML = tabs.map(t=>`<button class="tab${t.id===currentTab?' active':''}" data-tab="${t.id}">${ic(t.icon,19)}${t.label}</button>`).join('');
   tabbar.querySelectorAll('.tab').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -1551,6 +1555,7 @@ function render(){
   else if(currentTab === 'repairs') renderRepairsTab();
   else if(currentTab === 'purchases' && isOwner()) renderPurchasesTab();
   else if(currentTab === 'sales') renderSalesTab();
+  else if(currentTab === 'payments' && isOwner()) renderPaymentsTab();
 
   if(currentTab === 'dashboard'){
     document.getElementById('qaSale').addEventListener('click', ()=>{
@@ -1923,14 +1928,15 @@ function openPurchaseModal(purchaseId){
       ${costFieldHtml}
       <div class="field"><label>Sale rate / unit (&#8377;)</label><input id="pu_price" type="number" placeholder="0" value="${existingPurchase?existingPurchase.price:''}"></div>
       <div class="field"><label>Discount from vendor (&#8377;, optional)</label><input id="pu_discount" type="number" placeholder="0" value="${existingPurchase?existingPurchase.discount||'':''}"></div>
-      <div class="field">
-        <label>Payment status</label>
-        <select id="pu_paymentStatus">
-          <option value="paid" ${existingPurchase&&existingPurchase.paymentStatus==='paid'?'selected':''}>Paid</option>
-          <option value="pending" ${!existingPurchase||existingPurchase.paymentStatus==='pending'?'selected':''}>Pending</option>
-          <option value="partial" ${existingPurchase&&existingPurchase.paymentStatus==='partial'?'selected':''}>Partially paid</option>
-        </select>
+      ${existingPurchase?`
+      <div class="card" style="margin-bottom:12px;background:var(--bg);">
+        <div class="vendor-chip"><span>Paid to vendor so far</span><span>${fmt(existingPurchase.amountPaid||0)}</span></div>
+        <div class="vendor-chip"><span>Status</span><span style="text-transform:capitalize;">${existingPurchase.paymentStatus||'pending'}</span></div>
       </div>
+      <div class="hint-text" style="margin-top:-6px;">Use "Pay vendor" from the purchase list to record further payments.</div>
+      ` : `
+      <div class="field"><label>Amount paid to vendor now (&#8377;, optional)</label><input id="pu_amountPaid" type="number" placeholder="0" value="0"></div>
+      `}
       <div id="pu_error" class="error-text" style="display:none;"></div>
       <button class="btn btn-violet" id="pu_save" style="margin-bottom:10px;">${ic('download',16)}${existingPurchase?'Save changes':'Add to stock'}</button>
       ${(existingPurchase && isOwner())?'<button class="btn-danger-text" id="pu_delete" style="width:100%;">Delete this purchase</button>':''}
@@ -1981,7 +1987,6 @@ function openPurchaseModal(purchaseId){
     const mrp = parseFloat(document.getElementById('pu_mrp').value);
     const qty = parseInt(document.getElementById('pu_qty').value);
     const discount = parseFloat(document.getElementById('pu_discount').value);
-    const paymentStatus = document.getElementById('pu_paymentStatus').value;
     const errEl = document.getElementById('pu_error');
     if(!vendorName || !name || isNaN(price) || price<0 || isNaN(qty) || qty<=0){
       errEl.textContent = 'Please enter the vendor name, item name, a valid sale rate, and a quantity greater than 0.';
@@ -2013,15 +2018,24 @@ function openPurchaseModal(purchaseId){
     if(existingPurchase){
       existingPurchase.vendorName=vendorName; existingPurchase.vendorPhone=vendorPhone; existingPurchase.vendorGst=vendorGst; existingPurchase.vendorAddress=vendorAddress;
       existingPurchase.qty=qty; existingPurchase.cost=safeCost; existingPurchase.price=price; existingPurchase.mrp=safeMrp;
-      existingPurchase.discount=safeDiscount; existingPurchase.paymentStatus=paymentStatus; existingPurchase.category=category; existingPurchase.gstPercent=safeGst;
+      existingPurchase.discount=safeDiscount; existingPurchase.category=category; existingPurchase.gstPercent=safeGst;
+      const owedNow = (safeCost*qty) - safeDiscount;
+      existingPurchase.paymentStatus = (existingPurchase.amountPaid||0) >= owedNow-0.01 ? 'paid' : ((existingPurchase.amountPaid||0)>0 ? 'partial' : 'pending');
       if(!existingPurchase.productId) existingPurchase.productId = existingProduct.id;
     } else {
+      const amountPaidEl = document.getElementById('pu_amountPaid');
+      const owed = (safeCost*qty) - safeDiscount;
+      const amountPaid = amountPaidEl ? Math.min(owed, Math.max(0, parseFloat(amountPaidEl.value)||0)) : 0;
+      const nowIso = new Date().toISOString();
       purchases.push({
         id: uid(),
-        date: new Date().toISOString(),
+        date: nowIso,
         vendorName, vendorPhone, vendorGst, vendorAddress,
         productId: existingProduct.id, itemName: name, qty, cost: safeCost, price, mrp: safeMrp,
-        discount: safeDiscount, paymentStatus, category, gstPercent: safeGst
+        discount: safeDiscount, category, gstPercent: safeGst,
+        amountPaid,
+        paymentStatus: amountPaid >= owed-0.01 ? 'paid' : (amountPaid>0 ? 'partial' : 'pending'),
+        paymentHistory: amountPaid>0 ? [{date: nowIso, amount: amountPaid}] : []
       });
     }
     await saveProducts();
@@ -2247,15 +2261,17 @@ async function completeSale(){
     amountPending = Math.max(0, t.total - amountPaid);
   }
   const invoice = nextInvoiceNumber();
+  const nowIso = new Date().toISOString();
   const sale = {
     id: uid(),
     invoiceNo: invoice.label,
-    date: new Date().toISOString(),
+    date: nowIso,
     items: cart.map(c=>({id:c.id,name:c.name,price:c.price,cost:c.cost,mrp:c.mrp,gstPercent:c.gstPercent,imei:c.imei,category:c.category,qty:c.qty})),
     subtotal: t.subtotal, discountPercent: t.discountPercent, discountAmount: t.discountAmount,
     taxableTotal: t.taxableTotal, gstTotal: t.gstTotal, cgst: t.cgst, sgst: t.sgst,
     total: t.total, profit: t.profit,
     paymentMethod, amountPaid, amountPending,
+    paymentHistory: amountPaid>0 ? [{date: nowIso, amount: amountPaid}] : [],
     customerName, customerPhone, customerAddress
   };
   sales.push(sale);
@@ -2487,8 +2503,10 @@ function renderSalesList(){
       <div class="sale-meta">${s.invoiceNo?(s.invoiceNo+' &middot; '):''}${new Date(s.date).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
       <div class="sale-meta">${s.items.map(i=>i.name+' x'+i.qty).join(', ')}${s.discount?(' &middot; discount '+fmt(s.discount)):''}</div>
       ${isOwner()?`<div class="sale-profit">Profit: ${fmt(s.profit||0)}</div>`:''}
-      <div style="display:flex;gap:8px;margin-top:8px;">
+      ${(s.amountPending>0)?`<div class="sale-meta" style="color:var(--red-dark);font-weight:600;">Collected ${fmt(s.amountPaid||0)} &middot; Due ${fmt(s.amountPending)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
         <button class="btn-danger-text view-invoice" data-id="${s.id}" style="color:var(--cyan-dark);padding:4px 0;">${ic('download',13)} PDF</button>
+        ${(s.amountPending>0)?`<button class="btn-danger-text collect-payment" data-id="${s.id}" style="color:var(--violet-dark);padding:4px 0;">${ic('wallet',13)} Collect payment</button>`:''}
         ${isOwner()?`<button class="btn-danger-text edit-sale" data-id="${s.id}" style="color:var(--ink-soft);padding:4px 0;">Edit</button>`:''}
         ${isOwner()?`<button class="btn-danger-text delete-sale" data-id="${s.id}" style="padding:4px 0;">Delete</button>`:''}
       </div>
@@ -2499,6 +2517,9 @@ function renderSalesList(){
       const sale = sales.find(s=>s.id===el.dataset.id);
       if(sale) showInvoiceModal(sale);
     });
+  });
+  area.querySelectorAll('.collect-payment').forEach(el=>{
+    el.addEventListener('click', ()=>openRecordPaymentModal('sale', el.dataset.id));
   });
   area.querySelectorAll('.edit-sale').forEach(el=>{
     el.addEventListener('click', ()=>openEditSaleModal(el.dataset.id));
@@ -2512,6 +2533,52 @@ function renderSalesList(){
       showToast('Bill deleted');
     });
   });
+}
+
+function openRecordPaymentModal(type, id){
+  const record = type==='sale' ? sales.find(s=>s.id===id) : purchases.find(p=>p.id===id);
+  if(!record) return;
+  const pending = type==='sale' ? (record.amountPending||0) : (purchaseOwedAmount(record) - (record.amountPaid||0));
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+  <div class="modal-overlay" id="rpOverlay">
+    <div class="modal-sheet">
+      <div class="modal-title">${type==='sale'?'Collect payment':'Pay vendor'}<button class="close-x" id="rpClose">&times;</button></div>
+      <div class="hint-text">${type==='sale'?('From '+(record.customerName||'customer')):('To '+record.vendorName)} &middot; Due: ${fmt(pending)}</div>
+      <div class="field"><label>Amount ${type==='sale'?'collected':'paid'} now (&#8377;)</label><input id="rp_amount" type="number" placeholder="0" value="${pending}"></div>
+      <div id="rp_error" class="error-text" style="display:none;"></div>
+      <button class="btn btn-primary" id="rp_save">Save payment</button>
+    </div>
+  </div>`;
+  document.getElementById('rpClose').onclick = ()=>root.innerHTML='';
+  document.getElementById('rpOverlay').addEventListener('click',(e)=>{ if(e.target.id==='rpOverlay') root.innerHTML=''; });
+  document.getElementById('rp_save').onclick = async ()=>{
+    const amt = parseFloat(document.getElementById('rp_amount').value);
+    const errEl = document.getElementById('rp_error');
+    if(isNaN(amt) || amt<=0 || amt>pending+0.01){
+      errEl.textContent = 'Enter an amount between 0 and ' + fmt(pending) + '.';
+      errEl.style.display = 'block';
+      return;
+    }
+    const nowIso = new Date().toISOString();
+    if(!Array.isArray(record.paymentHistory)) record.paymentHistory = [];
+    record.paymentHistory.push({date: nowIso, amount: amt});
+    record.amountPaid = (record.amountPaid||0) + amt;
+    if(type==='sale'){
+      record.amountPending = Math.max(0, (record.amountPending||0) - amt);
+      await saveSales();
+    } else {
+      const owed = purchaseOwedAmount(record);
+      record.paymentStatus = record.amountPaid >= owed - 0.01 ? 'paid' : (record.amountPaid>0 ? 'partial' : 'pending');
+      await savePurchases();
+    }
+    root.innerHTML='';
+    render();
+    showToast('Payment recorded');
+  };
+}
+function purchaseOwedAmount(p){
+  return (Number(p.cost)||0)*(Number(p.qty)||0) - (Number(p.discount)||0);
 }
 
 function openEditSaleModal(saleId){
@@ -2603,16 +2670,25 @@ function renderPurchList(){
     <div class="vendor-chip"><span>${v}</span><span>${fmt(vendorTotals[v])}</span></div>`).join('') + `</div>`;
   html += '<div class="card">' + sorted.map(p=>{
     const net = (p.cost*p.qty)-(Number(p.discount)||0);
+    const owed = purchaseOwedAmount(p);
+    const pendingAmt = Math.max(0, owed - (Number(p.amountPaid)||0));
     return `
     <div class="sale-row edit-purchase" data-id="${p.id}" style="cursor:pointer;">
       <div class="sale-top"><span>${p.vendorName}</span><span>${fmt(net)}</span></div>
       <div class="sale-meta">${new Date(p.date).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
       <div class="sale-meta">${p.itemName} &middot; ${p.qty} pcs &middot; ${fmt(p.cost)}/unit${p.discount?(' &middot; discount '+fmt(p.discount)):''}</div>
       ${p.vendorPhone?`<div class="sale-meta">${ic('user',11)} ${p.vendorPhone}</div>`:''}
-      <div class="sale-meta" style="text-transform:capitalize;">${ic('wallet',11)} ${p.paymentStatus||'pending'} &middot; <span style="color:var(--cyan-dark);font-weight:600;">Tap to edit</span></div>
+      <div class="sale-meta" style="text-transform:capitalize;">${ic('wallet',11)} ${p.paymentStatus||'pending'}${pendingAmt>0?(' &middot; Due '+fmt(pendingAmt)):''} &middot; <span style="color:var(--cyan-dark);font-weight:600;">Tap to edit</span></div>
+      ${(pendingAmt>0 && isOwner())?`<button class="btn-danger-text pay-vendor" data-id="${p.id}" style="color:var(--violet-dark);padding:6px 0 0;">${ic('wallet',13)} Pay vendor</button>`:''}
     </div>`;
   }).join('') + '</div>';
   area.innerHTML = html;
+  area.querySelectorAll('.pay-vendor').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openRecordPaymentModal('purchase', el.dataset.id);
+    });
+  });
   area.querySelectorAll('.edit-purchase').forEach(el=>{
     el.addEventListener('click', ()=>openPurchaseModal(el.dataset.id));
   });
@@ -2620,6 +2696,152 @@ function renderPurchList(){
 
 window.addEventListener('online', ()=>{ if(currentUser){ showToast('Back online'); render(); } });
 window.addEventListener('offline', ()=>{ if(currentUser){ showToast('Offline - saving on this device'); render(); } });
+
+/* ---------------- Payments (category-wise In / Out / Dues) ---------------- */
+function getSaleCategoryShares(sale){
+  const bySubtotal = {};
+  let total = 0;
+  safeArray(sale.items).forEach(it=>{
+    const cat = it.category || 'Mobile';
+    const amt = (Number(it.price)||0)*(Number(it.qty)||0);
+    bySubtotal[cat] = (bySubtotal[cat]||0) + amt;
+    total += amt;
+  });
+  const shares = {};
+  Object.keys(bySubtotal).forEach(cat=>{ shares[cat] = total>0 ? bySubtotal[cat]/total : 0; });
+  return shares;
+}
+
+function computePaymentsReport(from, to){
+  const categories = ['Mobile','Spare Part','Accessory','Service'];
+  const inByCat = {}, outByCat = {}, dueCustByCat = {}, dueVendByCat = {};
+  categories.forEach(c=>{ inByCat[c]=0; outByCat[c]=0; dueCustByCat[c]=0; dueVendByCat[c]=0; });
+
+  safeArray(sales).forEach(sale=>{
+    const shares = getSaleCategoryShares(sale);
+    safeArray(sale.paymentHistory).forEach(ph=>{
+      if(ph && withinRange(ph.date, from, to)){
+        Object.keys(shares).forEach(cat=>{
+          if(inByCat[cat]===undefined) inByCat[cat]=0;
+          inByCat[cat] += (Number(ph.amount)||0)*shares[cat];
+        });
+      }
+    });
+    if((sale.amountPending||0) > 0){
+      Object.keys(shares).forEach(cat=>{
+        if(dueCustByCat[cat]===undefined) dueCustByCat[cat]=0;
+        dueCustByCat[cat] += sale.amountPending*shares[cat];
+      });
+    }
+  });
+
+  safeArray(purchases).forEach(p=>{
+    const cat = p.category || 'Mobile';
+    safeArray(p.paymentHistory).forEach(ph=>{
+      if(ph && withinRange(ph.date, from, to)){
+        outByCat[cat] = (outByCat[cat]||0) + (Number(ph.amount)||0);
+      }
+    });
+    const owed = purchaseOwedAmount(p);
+    const pendingAmt = Math.max(0, owed - (Number(p.amountPaid)||0));
+    if(pendingAmt > 0){
+      dueVendByCat[cat] = (dueVendByCat[cat]||0) + pendingAmt;
+    }
+  });
+
+  return { categories, inByCat, outByCat, dueCustByCat, dueVendByCat };
+}
+
+function renderPaymentsTab(){
+  const content = document.getElementById('content');
+  let html = `<div class="section-title"><span class="st-left">${ic('payments',15)}Payments overview</span></div>`;
+  html += renderFilterBar('paymentsFrom','paymentsTo', paymentsFilterFrom, paymentsFilterTo);
+  html += `<div class="hint-text" style="margin-top:-6px;">Date range applies to money In/Out below. Dues always show your current outstanding balance.</div>`;
+  content.innerHTML = html + '<div id="paymentsArea"></div>';
+  document.getElementById('paymentsFrom').addEventListener('change', (e)=>{ paymentsFilterFrom = e.target.value; renderPaymentsArea(); });
+  document.getElementById('paymentsTo').addEventListener('change', (e)=>{ paymentsFilterTo = e.target.value; renderPaymentsArea(); });
+  document.getElementById('paymentsFrom_clear').addEventListener('click', ()=>{
+    paymentsFilterFrom=''; paymentsFilterTo='';
+    document.getElementById('paymentsFrom').value=''; document.getElementById('paymentsTo').value='';
+    renderPaymentsArea();
+  });
+  renderPaymentsArea();
+}
+
+function renderPaymentsArea(){
+  const area = document.getElementById('paymentsArea');
+  const r = computePaymentsReport(paymentsFilterFrom, paymentsFilterTo);
+  const totalIn = r.categories.reduce((s,c)=>s+r.inByCat[c],0);
+  const totalOut = r.categories.reduce((s,c)=>s+r.outByCat[c],0);
+  const totalDueCust = r.categories.reduce((s,c)=>s+r.dueCustByCat[c],0);
+  const totalDueVend = r.categories.reduce((s,c)=>s+r.dueVendByCat[c],0);
+
+  let html = `<div class="stat-grid" style="margin:0 0 14px;">
+    <div class="stat-box" style="background:#E4F5EE;border-color:#BFE9DD;">
+      <div class="label" style="color:var(--cyan-dark);">${ic('trendingUp',13)}Total In</div>
+      <div class="value" style="color:var(--cyan-dark);">${fmt(totalIn)}</div>
+    </div>
+    <div class="stat-box" style="background:#FBE7E6;border-color:#F3C9C6;">
+      <div class="label" style="color:var(--red-dark);">${ic('download',13)}Total Out</div>
+      <div class="value" style="color:var(--red-dark);">${fmt(totalOut)}</div>
+    </div>
+    <div class="stat-box" style="background:#EEEDFE;border-color:#D8D5FB;">
+      <div class="label" style="color:var(--violet-dark);">${ic('user',13)}Customer dues</div>
+      <div class="value" style="color:var(--violet-dark);">${fmt(totalDueCust)}</div>
+    </div>
+    <div class="stat-box" style="background:#FCEBD6;border-color:#F2CE9E;">
+      <div class="label" style="color:var(--amber-dark);">${ic('truck',13)}Vendor dues</div>
+      <div class="value" style="color:var(--amber-dark);">${fmt(totalDueVend)}</div>
+    </div>
+  </div>`;
+
+  html += `<div class="section-title" style="margin-top:6px;"><span class="st-left">${ic('list',15)}By category</span></div>`;
+  html += `<div class="card">`;
+  html += `<div class="vendor-chip" style="font-weight:700;color:var(--ink);"><span>Category</span><span style="display:flex;gap:14px;"><span style="width:60px;text-align:right;">In</span><span style="width:60px;text-align:right;">Out</span></span></div>`;
+  r.categories.forEach(cat=>{
+    if(r.inByCat[cat]===0 && r.outByCat[cat]===0 && r.dueCustByCat[cat]===0 && r.dueVendByCat[cat]===0) return;
+    html += `<div class="vendor-chip"><span>${cat}</span><span style="display:flex;gap:14px;"><span style="width:60px;text-align:right;color:var(--cyan-dark);">${fmt(r.inByCat[cat])}</span><span style="width:60px;text-align:right;color:var(--red-dark);">${fmt(r.outByCat[cat])}</span></span></div>`;
+  });
+  html += `</div>`;
+
+  const duesCustList = sales.filter(s=>(s.amountPending||0)>0).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const duesVendList = purchases.filter(p=>{ const owed=purchaseOwedAmount(p); return owed-(Number(p.amountPaid)||0) > 0.01; }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  html += `<div class="section-title"><span class="st-left">${ic('user',15)}Customers who owe you (${duesCustList.length})</span></div>`;
+  if(duesCustList.length===0){
+    html += `<div class="card"><div class="empty" style="padding:20px;"><span class="big-icon">${ic('user',26)}</span>No pending customer dues.</div></div>`;
+  } else {
+    html += '<div class="card">' + duesCustList.map(s=>`
+      <div class="sale-row">
+        <div class="sale-top"><span>${s.customerName||'Walk-in customer'}</span><span style="color:var(--violet-dark);">${fmt(s.amountPending)}</span></div>
+        <div class="sale-meta">${s.invoiceNo||''} &middot; ${new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <button class="btn-danger-text collect-payment-p" data-id="${s.id}" style="color:var(--violet-dark);padding:6px 0 0;">${ic('wallet',13)} Collect payment</button>
+      </div>`).join('') + '</div>';
+  }
+
+  html += `<div class="section-title"><span class="st-left">${ic('truck',15)}Vendors you owe (${duesVendList.length})</span></div>`;
+  if(duesVendList.length===0){
+    html += `<div class="card"><div class="empty" style="padding:20px;"><span class="big-icon">${ic('truck',26)}</span>No pending vendor dues.</div></div>`;
+  } else {
+    html += '<div class="card">' + duesVendList.map(p=>{
+      const pendingAmt = purchaseOwedAmount(p) - (Number(p.amountPaid)||0);
+      return `
+      <div class="sale-row">
+        <div class="sale-top"><span>${p.vendorName}</span><span style="color:var(--amber-dark);">${fmt(pendingAmt)}</span></div>
+        <div class="sale-meta">${p.itemName} &middot; ${new Date(p.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <button class="btn-danger-text pay-vendor-p" data-id="${p.id}" style="color:var(--amber-dark);padding:6px 0 0;">${ic('wallet',13)} Pay vendor</button>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  area.innerHTML = html;
+  area.querySelectorAll('.collect-payment-p').forEach(el=>{
+    el.addEventListener('click', ()=>openRecordPaymentModal('sale', el.dataset.id));
+  });
+  area.querySelectorAll('.pay-vendor-p').forEach(el=>{
+    el.addEventListener('click', ()=>openRecordPaymentModal('purchase', el.dataset.id));
+  });
+}
 
 /* ---------------- Repairs / Service Job Cards ---------------- */
 const JOB_STATUSES = ['Received','In Progress','Ready','Delivered','Cancelled'];
