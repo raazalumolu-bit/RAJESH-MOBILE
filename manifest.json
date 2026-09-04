@@ -1,13 +1,10 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "Rajesh Mobiles",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "Rajesh Shop",
-  "start_url": "/",
-  "theme_color": "#ffffff",
-  "id": "rajesh.mobile.app",
+  "start_url": "/RAJESH-MOBILE/",
+  "scope": "/RAJESH-MOBILE/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "description": "Rajesh Mobile Shop Manager App"
 }
