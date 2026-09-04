@@ -7,4 +7,16 @@
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "description": "Rajesh Mobile Shop Manager App"
-}
+},
+"icons": [
+    {
+      "src": "/RAJESH-MOBILE/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/RAJESH-MOBILE/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
