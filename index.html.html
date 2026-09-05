@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <link rel="manifest" href="/RAJESH-MOBILE/manifest.json">
 <title>Rajesh Mobiles - Shop Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -383,7 +382,7 @@
     position:fixed;
     bottom:88px;
     left:calc(50% - 232px);
-    background:var(--navy);
+    background:linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
     color:#fff;
     width:52px;
     height:52px;
@@ -395,6 +394,20 @@
     box-shadow:0 6px 16px rgba(21,34,56,0.4);
     cursor:pointer;
     z-index:25;
+  }
+  .ai-mascot{
+    width:30px;
+    height:30px;
+    transform-origin:50% 88%;
+    animation:aiWiggle 3.2s ease-in-out infinite;
+  }
+  @keyframes aiWiggle{
+    0%, 55%, 100%{transform:rotate(0deg);}
+    62%{transform:rotate(-11deg);}
+    69%{transform:rotate(9deg);}
+    76%{transform:rotate(-7deg);}
+    83%{transform:rotate(4deg);}
+    90%{transform:rotate(-2deg);}
   }
   @media(max-width:480px){
     .ai-fab{left:16px;}
@@ -797,7 +810,18 @@
   <div class="content" id="content"></div>
 
   <button class="fab" id="fabBtn" style="display:none;" aria-label="Add">+</button>
-  <button class="ai-fab" id="aiChatFab" aria-label="Ask AI assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></button>
+  <button class="ai-fab" id="aiChatFab" aria-label="Ask AI assistant">
+    <svg class="ai-mascot" viewBox="0 0 28 28" fill="none">
+      <path d="M6.5 15c-2.3-0.8-3.6-3.4-2-5.8" stroke="#F7B538" stroke-width="2.1" stroke-linecap="round"/>
+      <circle cx="4.7" cy="8.4" r="1.7" fill="#F7B538"/>
+      <path d="M21.5 15c2.3-0.8 3.6-3.4 2-5.8" stroke="#F7B538" stroke-width="2.1" stroke-linecap="round"/>
+      <circle cx="23.3" cy="8.4" r="1.7" fill="#F7B538"/>
+      <circle cx="14" cy="16" r="8" fill="#E9FAF8"/>
+      <circle cx="10.6" cy="14.6" r="1.35" fill="#0A201F"/>
+      <circle cx="17.4" cy="14.6" r="1.35" fill="#0A201F"/>
+      <path d="M10.4 18.6c1.3 1.5 5.1 1.5 6.4 0" stroke="#0A201F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    </svg>
+  </button>
 
   <div class="tabbar" id="tabbar"></div>
 </div>
@@ -813,6 +837,7 @@ const ICONS = {
   payments: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 10h18M6 6h12a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z"/><path d="M7 15h4"/></svg>',
   chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>',
   send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
   stock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
   billing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.4 11.6a2 2 0 002 1.6h7.2a2 2 0 002-1.6L21 8H6"/></svg>',
   truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>',
@@ -1585,6 +1610,16 @@ document.getElementById('aiChatFab').addEventListener('click', openAiChatModal);
 /* ---------------- AI Shop Assistant ---------------- */
 let aiChatHistory = []; // {role:'user'|'assistant', content:'...'}
 let aiChatBusy = false;
+const AI_API_KEY_STORAGE = 'shop:aiApiKey';
+function getAiApiKey(){
+  try{ return localStorage.getItem(AI_API_KEY_STORAGE) || ''; }catch(e){ return ''; }
+}
+function setAiApiKey(key){
+  try{ localStorage.setItem(AI_API_KEY_STORAGE, key); }catch(e){}
+}
+function clearAiApiKey(){
+  try{ localStorage.removeItem(AI_API_KEY_STORAGE); }catch(e){}
+}
 
 function buildShopDataSummary(){
   try{
@@ -1637,6 +1672,7 @@ function buildShopDataSummary(){
 
 function openAiChatModal(){
   const root = document.getElementById('modalRoot');
+  const hasKey = !!getAiApiKey();
   root.innerHTML = `
   <div class="modal-overlay" id="aiChatOverlay" style="align-items:flex-end;">
     <div class="chat-modal-sheet">
@@ -1648,8 +1684,12 @@ function openAiChatModal(){
             <div style="font-size:11px;color:var(--ink-soft);">Ask about sales, stock, spares, repairs</div>
           </div>
         </div>
-        <button class="close-x" id="aiChatClose">&times;</button>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="close-x" id="aiChatSettingsBtn" aria-label="AI settings" style="font-size:15px;">${ic('gear',15)}</button>
+          <button class="close-x" id="aiChatClose">&times;</button>
+        </div>
       </div>
+      ${hasKey ? `
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-suggestions" id="chatSuggestions">
         ${["Todays sales?","Low stock items?","Who owes me money?","Active repair jobs?"].map(q=>`<button class="cat-chip" data-suggest="${q}">${q}</button>`).join('')}
@@ -1658,10 +1698,24 @@ function openAiChatModal(){
         <input id="chatInput" placeholder="Ask about your shop...">
         <button class="chat-send-btn" id="chatSendBtn">${ic('send',18)}</button>
       </div>
+      ` : `
+      <div style="padding:20px;flex:1;overflow-y:auto;">
+        <div class="empty" style="padding:10px 0 20px;">
+          <span class="big-icon">${ic('chat',30)}</span>
+          Connect an AI key once to start asking questions about your shop.
+        </div>
+        <button class="btn btn-primary" id="aiChatConnectBtn">${ic('download',16)}Connect AI assistant</button>
+      </div>
+      `}
     </div>
   </div>`;
   document.getElementById('aiChatClose').onclick = ()=>root.innerHTML='';
   document.getElementById('aiChatOverlay').addEventListener('click',(e)=>{ if(e.target.id==='aiChatOverlay') root.innerHTML=''; });
+  document.getElementById('aiChatSettingsBtn').onclick = ()=>openAiKeySetupModal();
+  if(!hasKey){
+    document.getElementById('aiChatConnectBtn').onclick = ()=>openAiKeySetupModal();
+    return;
+  }
   renderAiChatMessages();
   document.getElementById('chatSendBtn').addEventListener('click', handleAiChatSend);
   document.getElementById('chatInput').addEventListener('keydown', (e)=>{
@@ -1673,6 +1727,50 @@ function openAiChatModal(){
       handleAiChatSend();
     });
   });
+}
+
+function openAiKeySetupModal(){
+  const root = document.getElementById('modalRoot');
+  const existingKey = getAiApiKey();
+  root.innerHTML = `
+  <div class="modal-overlay" id="aiKeyOverlay">
+    <div class="modal-sheet">
+      <div class="modal-title">Connect AI assistant<button class="close-x" id="aiKeyClose">&times;</button></div>
+      <ol class="setup-steps">
+        <li>Go to <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com/settings/keys</a> and sign in (free to create)</li>
+        <li>Click "Create Key", give it any name, and copy the key (starts with <code>sk-ant-</code>)</li>
+        <li>Paste it below and tap Save</li>
+      </ol>
+      <div class="field"><label>Anthropic API key</label><input id="aiKeyInput" type="password" placeholder="sk-ant-..." value="${existingKey}"></div>
+      <div id="aiKeyError" class="error-text" style="display:none;"></div>
+      <button class="btn btn-primary" id="aiKeySave" style="margin-bottom:10px;">Save key</button>
+      ${existingKey?'<button class="btn-danger-text" id="aiKeyRemove" style="width:100%;">Remove saved key</button>':''}
+      <p class="auth-footnote">The key is saved only on this device's browser (not shared to other phones/computers, and not sent anywhere except Anthropic's API). You'll need to add it once per device.</p>
+    </div>
+  </div>`;
+  document.getElementById('aiKeyClose').onclick = ()=>root.innerHTML='';
+  document.getElementById('aiKeyOverlay').addEventListener('click',(e)=>{ if(e.target.id==='aiKeyOverlay') root.innerHTML=''; });
+  document.getElementById('aiKeySave').onclick = ()=>{
+    const key = document.getElementById('aiKeyInput').value.trim();
+    const errEl = document.getElementById('aiKeyError');
+    if(!key.startsWith('sk-ant-')){
+      errEl.textContent = "That doesn't look like a valid Anthropic API key (should start with sk-ant-).";
+      errEl.style.display = 'block';
+      return;
+    }
+    setAiApiKey(key);
+    root.innerHTML = '';
+    showToast('AI assistant connected');
+    openAiChatModal();
+  };
+  if(existingKey){
+    document.getElementById('aiKeyRemove').onclick = ()=>{
+      clearAiApiKey();
+      root.innerHTML = '';
+      showToast('AI key removed');
+      openAiChatModal();
+    };
+  }
 }
 
 function renderAiChatMessages(){
@@ -1697,6 +1795,11 @@ function escapeHtml(str){
 
 async function handleAiChatSend(){
   if(aiChatBusy) return;
+  const apiKey = getAiApiKey();
+  if(!apiKey){
+    openAiKeySetupModal();
+    return;
+  }
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if(!text) return;
@@ -1713,7 +1816,12 @@ async function handleAiChatSend(){
   try{
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
@@ -1721,9 +1829,17 @@ async function handleAiChatSend(){
         messages: aiChatHistory.map(m=>({role:m.role, content:m.content}))
       })
     });
-    const data = await response.json();
-    const reply = (data && data.content ? data.content : []).map(b=>b.text||'').join('\n').trim();
-    aiChatHistory.push({role:'assistant', content: reply || "Sorry, I couldn't understand that. Could you rephrase?"});
+    if(!response.ok){
+      let errMsg = 'Request failed (status ' + response.status + ').';
+      try{ const errData = await response.json(); if(errData && errData.error && errData.error.message) errMsg = errData.error.message; }catch(e2){}
+      if(response.status === 401) errMsg = 'Your AI key was rejected. Please check it in AI settings (gear icon above).';
+      if(response.status === 429) errMsg = 'Rate limit or credit balance reached on your Anthropic account. Please check console.anthropic.com or try again shortly.';
+      aiChatHistory.push({role:'assistant', content: errMsg});
+    } else {
+      const data = await response.json();
+      const reply = (data && data.content ? data.content : []).map(b=>b.text||'').join('\n').trim();
+      aiChatHistory.push({role:'assistant', content: reply || "Sorry, I couldn't understand that. Could you rephrase?"});
+    }
   }catch(e){
     aiChatHistory.push({role:'assistant', content: "Sorry, I couldn't reach the assistant right now. Please check your internet connection and try again."});
   }
@@ -1895,16 +2011,11 @@ function renderDashboard(){
   const recentSales = [...sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
   let html = '';
   html += `
-    <div class="quick-actions qa-row3" style="grid-template-columns:repeat(3,1fr);">
+    <div class="quick-actions">
       <button class="qa-btn" id="qaSale">
         <div class="qa-icon sale">${ic('cart',18)}</div>
         <div class="qa-label">New sale</div>
         <div class="qa-sub">Start a bill</div>
-      </button>
-      <button class="qa-btn" id="qaCollect">
-        <div class="qa-icon" style="background:#EEEDFE;color:var(--violet-dark);">${ic('wallet',18)}</div>
-        <div class="qa-label">Collect</div>
-        <div class="qa-sub">Payment</div>
       </button>
       <button class="qa-btn" id="qaPurchase">
         <div class="qa-icon purchase">${ic('download',18)}</div>
@@ -1913,14 +2024,14 @@ function renderDashboard(){
       </button>
     </div>`;
   const moreActions = [
-    {icon:'wrench', label:'Repairs', sub:'Service jobs', bg:'#FCEBD6', color:'var(--amber-dark)', tab:'repairs'}
+    {icon:'wrench', label:'Repairs', sub:'Service jobs', bg:'#FCEBD6', color:'var(--amber-dark)', tab:'repairs'},
+    {id:'qaCollect', icon:'wallet', label:'Collect', sub:'Payment', bg:'#EEEDFE', color:'var(--violet-dark)'}
   ];
   if(isOwner()){
-    moreActions.push({icon:'truck', label:'Purchases', sub:'Vendor history', bg:'#EEEDFE', color:'var(--violet-dark)', tab:'purchases'});
     moreActions.push({icon:'payments', label:'Payments', sub:'In / Out / Dues', bg:'#E4F5EE', color:'var(--cyan-dark)', tab:'payments'});
   }
-  html += `<div class="quick-actions" style="margin-top:2px;">` + moreActions.map(a=>`
-    <button class="qa-btn open-more-tab" data-tab="${a.tab}">
+  html += `<div class="quick-actions qa-row3" style="grid-template-columns:repeat(${moreActions.length},1fr);margin-top:2px;">` + moreActions.map(a=>`
+    <button class="qa-btn ${a.tab?'open-more-tab':''}" ${a.id?`id="${a.id}"`:''} ${a.tab?`data-tab="${a.tab}"`:''}>
       <div class="qa-icon" style="background:${a.bg};color:${a.color};">${ic(a.icon,18)}</div>
       <div class="qa-label">${a.label}</div>
       <div class="qa-sub">${a.sub}</div>
