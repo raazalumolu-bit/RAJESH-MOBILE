@@ -65,10 +65,67 @@
     align-items:center;
     justify-content:center;
     padding:32px 24px;
+    position:relative;
+    overflow:hidden;
   }
   @media(min-width:640px){
     .auth-screen{border-radius:26px;box-shadow:0 24px 60px rgba(21,34,56,0.18);min-height:600px;margin:28px auto;}
   }
+  .auth-blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(46px);
+    opacity:0.4;
+    z-index:0;
+    pointer-events:none;
+  }
+  .auth-blob.b1{width:200px;height:200px;background:var(--cyan);top:-50px;left:-60px;animation:blobDrift1 9s ease-in-out infinite;}
+  .auth-blob.b2{width:230px;height:230px;background:var(--amber);bottom:-70px;right:-60px;animation:blobDrift2 11s ease-in-out infinite;}
+  .auth-blob.b3{width:140px;height:140px;background:var(--violet);top:40%;right:-50px;opacity:0.25;animation:blobDrift1 7s ease-in-out infinite reverse;}
+  @keyframes blobDrift1{0%,100%{transform:translate(0,0);}50%{transform:translate(18px,-16px);}}
+  @keyframes blobDrift2{0%,100%{transform:translate(0,0);}50%{transform:translate(-16px,18px);}}
+
+  .phone-mockup-wrap{
+    position:relative;
+    z-index:1;
+    display:flex;
+    justify-content:center;
+    width:100%;
+    animation:fadeInUp 0.7s ease-out;
+  }
+  .phone-mockup{
+    width:290px;
+    max-width:88vw;
+    background:linear-gradient(160deg,#22355A 0%,#0D1826 100%);
+    border-radius:38px;
+    padding:12px 12px 20px;
+    box-shadow:0 32px 60px -18px rgba(21,34,56,0.55), 0 8px 18px rgba(21,34,56,0.28);
+    animation:floatPhone 4.6s ease-in-out infinite;
+    position:relative;
+  }
+  .phone-notch{
+    width:56px;height:5px;
+    background:rgba(255,255,255,0.22);
+    border-radius:3px;
+    margin:0 auto 10px;
+  }
+  .phone-screen{
+    background:#fff;
+    border-radius:26px;
+    padding:26px 22px 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .phone-home-indicator{
+    width:64px;height:4px;
+    background:rgba(255,255,255,0.28);
+    border-radius:2px;
+    margin:14px auto 0;
+  }
+  @keyframes floatPhone{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
   .auth-logo{
     width:64px;height:64px;border-radius:18px;
     background:linear-gradient(180deg,var(--cyan) 0%,var(--cyan-dark) 100%);
@@ -740,7 +797,7 @@
       padding-bottom:0;
     }
     .topbar{grid-area:topbar; border-radius:0;}
-    .content{grid-area:content; max-width:760px; width:100%; margin:0 auto; padding:24px 28px 48px;}
+    .content{grid-area:content; max-width:840px; width:100%; margin:0 auto; padding:24px 28px 48px;}
     .tabbar{
       grid-area:sidebar;
       position:static;
@@ -758,12 +815,14 @@
       height:100%;
     }
     .tab{
+      flex:none;
       flex-direction:row;
       justify-content:flex-start;
       gap:10px;
       padding:11px 14px;
       border-radius:10px;
       font-size:13.5px;
+      width:100%;
     }
     .tab .icon{width:auto;height:auto;border-radius:0;background:none !important;}
     .tab.active{background:#E4F5EE;color:var(--cyan-dark);}
@@ -1343,16 +1402,25 @@ function renderSetupScreen(){
   document.getElementById('app').classList.add('hidden');
   root.innerHTML = `
   <div class="auth-screen">
-    <div class="auth-logo">${ic('lock',28)}</div>
-    <p class="auth-title">Set up ${shopProfile.name || 'your shop'}</p>
-    <p class="auth-sub">Create a PIN for the owner login. Staff PIN is optional.</p>
-    <div class="auth-card">
-      <div class="field"><label>Owner PIN (4-6 digits)</label><input id="su_ownerPin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
-      <div class="field"><label>Staff PIN (optional)</label><input id="su_staffPin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
-      <div id="su_error" class="error-text" style="display:none;"></div>
-      <button class="btn btn-primary" id="su_save">${ic('lock',16)}Save and continue</button>
+    <div class="auth-blob b1"></div>
+    <div class="auth-blob b2"></div>
+    <div class="auth-blob b3"></div>
+    <div class="phone-mockup-wrap">
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="auth-logo">${ic('lock',28)}</div>
+          <p class="auth-title" style="text-align:center;">Set up ${shopProfile.name || 'your shop'}</p>
+          <p class="auth-sub" style="text-align:center;">Create a PIN for the owner login. Staff PIN is optional.</p>
+          <div class="field" style="width:100%;"><label>Owner PIN (4-6 digits)</label><input id="su_ownerPin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
+          <div class="field" style="width:100%;"><label>Staff PIN (optional)</label><input id="su_staffPin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
+          <div id="su_error" class="error-text" style="display:none;width:100%;"></div>
+          <button class="btn btn-primary" id="su_save" style="width:100%;">${ic('lock',16)}Save and continue</button>
+        </div>
+        <div class="phone-home-indicator"></div>
+      </div>
     </div>
-    <p class="auth-footnote" id="su_footnote">This app stores your shop's data online so it stays in sync between your phone and computer. Keep this app's link private to your shop only.</p>
+    <p class="auth-footnote" id="su_footnote" style="position:relative;z-index:1;">This app stores your shop's data online so it stays in sync between your phone and computer. Keep this app's link private to your shop only.</p>
   </div>`;
   if(usingLocalFallback){
     document.getElementById('su_footnote').textContent = "This copy of the app saves data on this device's browser only (it will stay after closing or refreshing). To share the same data between your phone and computer, open this app from the same Claude chat link on both devices instead of the downloaded file.";
@@ -1383,31 +1451,40 @@ function renderLoginScreen(defaultRole){
   let role = defaultRole;
   root.innerHTML = `
   <div class="auth-screen">
-    <div class="auth-logo">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-        <rect x="6" y="2" width="12" height="20" rx="2.6" fill="#0A201F"/>
-        <rect x="7.6" y="4" width="8.8" height="13.3" rx="1.3" fill="#E9FAF8"/>
-        <circle cx="12" cy="3.15" r="0.55" fill="#0A201F"/>
-        <rect x="10.4" y="18.55" width="3.2" height="0.75" rx="0.375" fill="#0A201F"/>
-        <rect x="9.1" y="12.4" width="1.3" height="2.6" rx="0.5" fill="#F7B538"/>
-        <rect x="11.05" y="10.6" width="1.3" height="4.4" rx="0.5" fill="#F7B538"/>
-        <rect x="13" y="13.2" width="1.3" height="1.8" rx="0.5" fill="#F7B538"/>
-      </svg>
-    </div>
-    <p class="auth-title">${shopProfile.name || 'Shop Manager'}</p>
-    <p class="auth-sub">Sign in to continue</p>
-    <div class="auth-card">
-      <div class="role-toggle">
-        <button class="role-btn" id="roleOwnerBtn">${ic('user',15)}Owner</button>
-        <button class="role-btn" id="roleStaffBtn">${ic('users',15)}Staff</button>
+    <div class="auth-blob b1"></div>
+    <div class="auth-blob b2"></div>
+    <div class="auth-blob b3"></div>
+    <div class="phone-mockup-wrap">
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="auth-logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <rect x="6" y="2" width="12" height="20" rx="2.6" fill="#0A201F"/>
+              <rect x="7.6" y="4" width="8.8" height="13.3" rx="1.3" fill="#E9FAF8"/>
+              <circle cx="12" cy="3.15" r="0.55" fill="#0A201F"/>
+              <rect x="10.4" y="18.55" width="3.2" height="0.75" rx="0.375" fill="#0A201F"/>
+              <rect x="9.1" y="12.4" width="1.3" height="2.6" rx="0.5" fill="#F7B538"/>
+              <rect x="11.05" y="10.6" width="1.3" height="4.4" rx="0.5" fill="#F7B538"/>
+              <rect x="13" y="13.2" width="1.3" height="1.8" rx="0.5" fill="#F7B538"/>
+            </svg>
+          </div>
+          <p class="auth-title" style="text-align:center;">${shopProfile.name || 'Shop Manager'}</p>
+          <p class="auth-sub" style="text-align:center;">Sign in to continue</p>
+          <div class="role-toggle" style="width:100%;">
+            <button class="role-btn" id="roleOwnerBtn">${ic('user',15)}Owner</button>
+            <button class="role-btn" id="roleStaffBtn">${ic('users',15)}Staff</button>
+          </div>
+          <div class="field" style="width:100%;"><label>Enter PIN</label><input id="li_pin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
+          <div id="li_error" class="error-text" style="display:none;width:100%;"></div>
+          <button class="btn btn-primary" id="li_submit" style="width:100%;">${ic('lock',16)}Log in</button>
+        </div>
+        <div class="phone-home-indicator"></div>
       </div>
-      <div class="field"><label>Enter PIN</label><input id="li_pin" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="&middot;&middot;&middot;&middot;"></div>
-      <div id="li_error" class="error-text" style="display:none;"></div>
-      <button class="btn btn-primary" id="li_submit">${ic('lock',16)}Log in</button>
     </div>
-    <p class="auth-footnote">Owner sees costs and profit. Staff can bill sales and manage stock without seeing money-in details.</p>
-    <button class="link-btn" id="forgotPinBtn" style="display:block;margin:14px auto 0;">Forgot your PIN?</button>
-    ${!firebaseMode ? `<button class="link-btn" id="goCloudSetup" style="display:block;margin:10px auto 0;">${ic('download',13)} Set up live sync across devices</button>` : ''}
+    <p class="auth-footnote" style="position:relative;z-index:1;">Owner sees costs and profit. Staff can bill sales and manage stock without seeing money-in details.</p>
+    <button class="link-btn" id="forgotPinBtn" style="display:block;margin:14px auto 0;position:relative;z-index:1;">Forgot your PIN?</button>
+    ${!firebaseMode ? `<button class="link-btn" id="goCloudSetup" style="display:block;margin:10px auto 0;position:relative;z-index:1;">${ic('download',13)} Set up live sync across devices</button>` : ''}
   </div>`;
   function setRole(r){
     role = r;
@@ -1611,8 +1688,16 @@ document.getElementById('aiChatFab').addEventListener('click', openAiChatModal);
 let aiChatHistory = []; // {role:'user'|'assistant', content:'...'}
 let aiChatBusy = false;
 const AI_API_KEY_STORAGE = 'shop:aiApiKey';
+// Rajesh Mobiles' own Anthropic API key - built in so every device works without setup.
+// Security note: since this file may be hosted publicly, anyone viewing the page source
+// could copy this key. Set a spending limit on it at console.anthropic.com/settings/billing.
+const BUILT_IN_AI_API_KEY = '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';
 function getAiApiKey(){
-  try{ return localStorage.getItem(AI_API_KEY_STORAGE) || ''; }catch(e){ return ''; }
+  try{
+    const saved = localStorage.getItem(AI_API_KEY_STORAGE);
+    if(saved) return saved;
+  }catch(e){}
+  return BUILT_IN_AI_API_KEY;
 }
 function setAiApiKey(key){
   try{ localStorage.setItem(AI_API_KEY_STORAGE, key); }catch(e){}
@@ -1731,21 +1816,24 @@ function openAiChatModal(){
 
 function openAiKeySetupModal(){
   const root = document.getElementById('modalRoot');
-  const existingKey = getAiApiKey();
+  let localOverride = '';
+  try{ localOverride = localStorage.getItem(AI_API_KEY_STORAGE) || ''; }catch(e){}
+  const usingBuiltIn = !localOverride;
   root.innerHTML = `
   <div class="modal-overlay" id="aiKeyOverlay">
     <div class="modal-sheet">
-      <div class="modal-title">Connect AI assistant<button class="close-x" id="aiKeyClose">&times;</button></div>
+      <div class="modal-title">AI assistant settings<button class="close-x" id="aiKeyClose">&times;</button></div>
+      ${usingBuiltIn ? `<div class="hint-text" style="margin-top:-4px;">Currently using the shop's built-in AI key. You only need to set a key below if you want this device to use a different one.</div>` : `<div class="hint-text" style="margin-top:-4px;">This device is using a custom key you saved here.</div>`}
       <ol class="setup-steps">
         <li>Go to <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com/settings/keys</a> and sign in (free to create)</li>
         <li>Click "Create Key", give it any name, and copy the key (starts with <code>sk-ant-</code>)</li>
         <li>Paste it below and tap Save</li>
       </ol>
-      <div class="field"><label>Anthropic API key</label><input id="aiKeyInput" type="password" placeholder="sk-ant-..." value="${existingKey}"></div>
+      <div class="field"><label>Anthropic API key</label><input id="aiKeyInput" type="password" placeholder="sk-ant-..." value="${localOverride}"></div>
       <div id="aiKeyError" class="error-text" style="display:none;"></div>
-      <button class="btn btn-primary" id="aiKeySave" style="margin-bottom:10px;">Save key</button>
-      ${existingKey?'<button class="btn-danger-text" id="aiKeyRemove" style="width:100%;">Remove saved key</button>':''}
-      <p class="auth-footnote">The key is saved only on this device's browser (not shared to other phones/computers, and not sent anywhere except Anthropic's API). You'll need to add it once per device.</p>
+      <button class="btn btn-primary" id="aiKeySave" style="margin-bottom:10px;">Save key for this device</button>
+      ${!usingBuiltIn?'<button class="btn-danger-text" id="aiKeyRemove" style="width:100%;">Remove custom key (use shop default)</button>':''}
+      <p class="auth-footnote">A key saved here only applies to this device's browser. It is not shared to other phones/computers.</p>
     </div>
   </div>`;
   document.getElementById('aiKeyClose').onclick = ()=>root.innerHTML='';
@@ -1763,7 +1851,7 @@ function openAiKeySetupModal(){
     showToast('AI assistant connected');
     openAiChatModal();
   };
-  if(existingKey){
+  if(!usingBuiltIn){
     document.getElementById('aiKeyRemove').onclick = ()=>{
       clearAiApiKey();
       root.innerHTML = '';
@@ -2024,13 +2112,17 @@ function renderDashboard(){
       </button>
     </div>`;
   const moreActions = [
-    {icon:'wrench', label:'Repairs', sub:'Service jobs', bg:'#FCEBD6', color:'var(--amber-dark)', tab:'repairs'},
-    {id:'qaCollect', icon:'wallet', label:'Collect', sub:'Payment', bg:'#EEEDFE', color:'var(--violet-dark)'}
+    {icon:'wrench', label:'Repairs', sub:'Service jobs', bg:'#FCEBD6', color:'var(--amber-dark)', tab:'repairs'}
   ];
   if(isOwner()){
-    moreActions.push({icon:'payments', label:'Payments', sub:'In / Out / Dues', bg:'#E4F5EE', color:'var(--cyan-dark)', tab:'payments'});
+    moreActions.push({icon:'truck', label:'Purchases', sub:'Vendor history', bg:'#EEEDFE', color:'var(--violet-dark)', tab:'purchases'});
   }
-  html += `<div class="quick-actions qa-row3" style="grid-template-columns:repeat(${moreActions.length},1fr);margin-top:2px;">` + moreActions.map(a=>`
+  moreActions.push({id:'qaCollect', icon:'wallet', label:'Collect', sub:'Payment', bg:'#E4F5EE', color:'var(--cyan-dark)'});
+  if(isOwner()){
+    moreActions.push({icon:'payments', label:'Payments', sub:'In / Out / Dues', bg:'#E8ECF3', color:'var(--navy-2)', tab:'payments'});
+  }
+  html += `<div class="section-title" style="margin:16px 2px 8px;"><span class="st-left"><span class="st-icon-badge">${ic('wrench',15)}</span>More tools</span></div>`;
+  html += `<div class="quick-actions" style="margin-top:0;">` + moreActions.map(a=>`
     <button class="qa-btn ${a.tab?'open-more-tab':''}" ${a.id?`id="${a.id}"`:''} ${a.tab?`data-tab="${a.tab}"`:''}>
       <div class="qa-icon" style="background:${a.bg};color:${a.color};">${ic(a.icon,18)}</div>
       <div class="qa-label">${a.label}</div>
@@ -2589,7 +2681,11 @@ function computeCartTotals(discountPercent){
   });
   const total = taxableTotal + gstTotal;
   const discountAmount = subtotal - total;
-  const profit = taxableTotal - costTotal;
+  // Profit compares what the customer actually paid (total, GST-inclusive) against what
+  // the shop actually paid the vendor (cost, GST-inclusive) - a simple cash-basis margin.
+  // GST itself is money collected on the government's behalf, not shop revenue, so it's
+  // shown separately as a breakdown below but doesn't change the profit figure.
+  const profit = total - costTotal;
   return { subtotal, discountPercent:pct, discountAmount, taxableTotal, gstTotal, cgst:gstTotal/2, sgst:gstTotal/2, total, profit };
 }
 
@@ -2641,14 +2737,14 @@ function renderCart(){
         <button class="qty-btn" data-inc="${c.id}">+</button>
       </div>
     </div>`).join('') +
-    `<div class="total-bar" style="font-size:14px;font-weight:500;padding-top:10px;"><span>Subtotal</span><span>${fmt(t.subtotal)}</span></div>
+    `<div class="total-bar" style="font-size:14px;font-weight:500;padding-top:10px;"><span>Subtotal (price already includes GST)</span><span>${fmt(t.subtotal)}</span></div>
     <div class="field" style="margin-top:6px;"><label>Discount (%, optional)</label><input id="custDiscountPct" type="number" min="0" max="100" placeholder="0" value="${cartDiscount||''}"></div>
     <div class="total-bar" style="font-size:13px;font-weight:500;color:var(--red-dark);"><span>Discount amount</span><span id="cartDiscountAmt">- ${fmt(t.discountAmount)}</span></div>
-    <div class="total-bar" style="font-size:13px;font-weight:500;"><span>Taxable value</span><span id="cartTaxable">${fmt(t.taxableTotal)}</span></div>
-    <div class="total-bar" style="font-size:13px;font-weight:500;color:var(--ink-soft);"><span>GST (CGST+SGST)</span><span id="cartGst">${fmt(t.gstTotal)}</span></div>
-    <div class="total-bar"><span>Total</span><span id="cartFinalTotal">${fmt(t.total)}</span></div>
-    <div class="field" style="margin-top:10px;">
-      <label>Customer name (optional)</label>
+    <div class="total-bar" style="border-top:1px solid var(--line);margin-top:2px;padding-top:10px;"><span>Total payable</span><span id="cartFinalTotal">${fmt(t.total)}</span></div>
+    <div class="hint-text" style="margin:2px 0 8px;">GST breakup (already included in total above, shown for the bill):</div>
+    <div class="total-bar" style="font-size:12.5px;font-weight:500;color:var(--ink-soft);padding:2px 0;"><span>&nbsp;&nbsp;Taxable value</span><span id="cartTaxable">${fmt(t.taxableTotal)}</span></div>
+    <div class="total-bar" style="font-size:12.5px;font-weight:500;color:var(--ink-soft);padding:2px 0 10px;"><span>&nbsp;&nbsp;GST (CGST+SGST)</span><span id="cartGst">${fmt(t.gstTotal)}</span></div>
+    <div class="field" style="margin-top:10px;">      <label>Customer name (optional)</label>
       <input id="custName" list="cust_suggestions" placeholder="Customer name">
       <datalist id="cust_suggestions">${custOptions}</datalist>
     </div>
@@ -2789,24 +2885,31 @@ function buildInvoiceDoc(sale){
   y += 16;
 
   const labelX = right-180;
-  doc.text('Subtotal (incl. GST)', labelX, y); doc.text(fmt(sale.subtotal!==undefined?sale.subtotal:sale.total).replace('\u20B9','Rs '), right, y, {align:'right'});
+  doc.text('Subtotal (price incl. GST)', labelX, y); doc.text(fmt(sale.subtotal!==undefined?sale.subtotal:sale.total).replace('\u20B9','Rs '), right, y, {align:'right'});
   y += 14;
   if(sale.discountAmount || sale.discountPercent){
     doc.text('Discount ('+(sale.discountPercent||0)+'%)', labelX, y);
     doc.text('- '+fmt(sale.discountAmount||0).replace('\u20B9','Rs '), right, y, {align:'right'});
     y += 14;
   }
-  doc.text('Taxable value', labelX, y); doc.text(fmt(sale.taxableTotal!==undefined?sale.taxableTotal:sale.total).replace('\u20B9','Rs '), right, y, {align:'right'});
-  y += 14;
-  doc.text('CGST', labelX, y); doc.text(fmt(sale.cgst||0).replace('\u20B9','Rs '), right, y, {align:'right'});
-  y += 14;
-  doc.text('SGST', labelX, y); doc.text(fmt(sale.sgst||0).replace('\u20B9','Rs '), right, y, {align:'right'});
-  y += 8;
+  y += 4;
   doc.line(labelX, y, right, y);
   y += 16;
   doc.setFont('helvetica','bold'); doc.setFontSize(12);
   doc.text('Grand Total', labelX, y); doc.text(fmt(sale.total).replace('\u20B9','Rs '), right, y, {align:'right'});
-  y += 22;
+  y += 20;
+  doc.setFont('helvetica','italic'); doc.setFontSize(8);
+  doc.setTextColor(120,120,120);
+  doc.text('GST breakup (already included in the total above):', labelX-40, y);
+  y += 13;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  doc.text('Taxable value', labelX, y); doc.text(fmt(sale.taxableTotal!==undefined?sale.taxableTotal:sale.total).replace('\u20B9','Rs '), right, y, {align:'right'});
+  y += 12;
+  doc.text('CGST', labelX, y); doc.text(fmt(sale.cgst||0).replace('\u20B9','Rs '), right, y, {align:'right'});
+  y += 12;
+  doc.text('SGST', labelX, y); doc.text(fmt(sale.sgst||0).replace('\u20B9','Rs '), right, y, {align:'right'});
+  doc.setTextColor(0,0,0);
+  y += 20;
 
   doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
   doc.text('Payment method: ' + (sale.paymentMethod||'Cash'), left, y);
