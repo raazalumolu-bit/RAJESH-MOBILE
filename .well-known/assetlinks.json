@@ -1,1 +1,8 @@
-
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.raazalumolu_bit.twa",
+        "sha256_cert_fingerprints": ["B9:0D:65:7E:77:6C:F1:72:E8:98:E5:29:6F:59:E2:B6:63:87:A5:CD:EF:FC:E6:31:B0:CB:68:E2:3B:6A:FE:FE"]
+      }
+    }]
