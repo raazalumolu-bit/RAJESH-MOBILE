@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.rajeshmobiles.twa",
+        "sha256_cert_fingerprints": ["5D:07:1A:46:B0:FB:6A:D0:53:4F:34:4F:8C:41:EE:AE:EA:29:0D:85:BD:08:2D:0B:3C:25:71:EE:88:3D:9F:0D"]
+      }
+    }]
