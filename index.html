@@ -1636,12 +1636,24 @@ function stopLivePolling(){
 /* ---------------- Tabbar ---------------- */
 function buildTabbar(){
   const tabbar = document.getElementById('tabbar');
-  const tabs = [
+  const isDesktop = window.innerWidth >= 900;
+  let tabs = [
     {id:'dashboard', label:'Home', icon:'home'},
     {id:'stock', label:'Stock', icon:'stock'},
     {id:'billing', label:'Billing', icon:'billing'},
     {id:'sales', label:'Sales', icon:'list'}
   ];
+  if(isDesktop){
+    tabs = [
+      {id:'dashboard', label:'Home', icon:'home'},
+      {id:'stock', label:'Stock', icon:'stock'},
+      {id:'billing', label:'Billing', icon:'billing'},
+      {id:'repairs', label:'Repairs', icon:'wrench'}
+    ];
+    if(isOwner()) tabs.push({id:'purchases', label:'Purchases', icon:'truck'});
+    tabs.push({id:'sales', label:'Sales', icon:'list'});
+    if(isOwner()) tabs.push({id:'payments', label:'Payments', icon:'payments'});
+  }
   tabbar.innerHTML = tabs.map(t=>`<button class="tab${t.id===currentTab?' active':''}" data-tab="${t.id}">${icBold(t.icon,24)}${t.label}</button>`).join('');
   tabbar.querySelectorAll('.tab').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -2172,17 +2184,32 @@ function renderDashboard(){
       <div class="qa-sub">${a.sub}</div>
     </button>`).join('') + `</div>`;
 
-  // Business snapshot - gives a fuller sense of the shop's overall activity, not just today
+  // Business snapshot - shows the shop's overall lifetime activity so the home page
+  // still feels substantial even on a day with no sales yet.
   const uniqueCustomerCount = new Set(sales.filter(s=>s.customerName).map(s=>s.customerName.trim().toLowerCase())).size;
   const activeRepairCount = jobCards.filter(j=>j.status!=='Delivered' && j.status!=='Cancelled').length;
   const totalBillsCount = sales.length;
   const totalStockItemsCount = products.length;
+  const lifetimeSales = sales.reduce((s,x)=>s+(x.total||0),0);
+  const lifetimeProfit = sales.reduce((s,x)=>s+(x.profit||0),0);
   html += `<div class="section-title"><span class="st-left"><span class="st-icon-badge">${ic('list',15)}</span>Business snapshot</span></div>`;
-  html += `<div class="card" style="padding:6px 16px;">
-    <div class="vendor-chip"><span>${ic('box',13)} &nbsp;Items in stock</span><span style="font-weight:600;">${totalStockItemsCount}</span></div>
-    <div class="vendor-chip"><span>${ic('list',13)} &nbsp;Total bills raised</span><span style="font-weight:600;">${totalBillsCount}</span></div>
-    <div class="vendor-chip"><span>${ic('user',13)} &nbsp;Customers served</span><span style="font-weight:600;">${uniqueCustomerCount}</span></div>
-    <div class="vendor-chip"><span>${ic('wrench',13)} &nbsp;Active repair jobs</span><span style="font-weight:600;">${activeRepairCount}</span></div>
+  html += `<div class="card" style="padding:0;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);padding:16px;display:flex;gap:0;">
+      <div style="flex:1;">
+        <div style="color:#9FB3CC;font-size:11px;">${ic('cart',12)} All-time sales</div>
+        <div style="color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;margin-top:3px;">${fmt(lifetimeSales)}</div>
+      </div>
+      ${isOwner()?`<div style="flex:1;border-left:1px solid rgba(255,255,255,0.15);padding-left:16px;">
+        <div style="color:#9FB3CC;font-size:11px;">${ic('trendingUp',12)} All-time profit</div>
+        <div style="color:var(--cyan);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;margin-top:3px;">${fmt(lifetimeProfit)}</div>
+      </div>`:''}
+    </div>
+    <div style="padding:4px 16px 6px;">
+      <div class="vendor-chip"><span>${ic('list',13)} &nbsp;Total bills raised</span><span style="font-weight:600;">${totalBillsCount}</span></div>
+      <div class="vendor-chip"><span>${ic('user',13)} &nbsp;Customers served</span><span style="font-weight:600;">${uniqueCustomerCount}</span></div>
+      <div class="vendor-chip"><span>${ic('box',13)} &nbsp;Item types in stock</span><span style="font-weight:600;">${totalStockItemsCount}</span></div>
+      <div class="vendor-chip"><span>${ic('wrench',13)} &nbsp;Active repair jobs</span><span style="font-weight:600;">${activeRepairCount}</span></div>
+    </div>
   </div>`;
 
   if(lowStockItems.length){
@@ -3329,6 +3356,14 @@ function renderPurchList(){
   });
 }
 
+let lastTabbarIsDesktop = null;
+window.addEventListener('resize', ()=>{
+  const nowDesktop = window.innerWidth >= 900;
+  if(currentUser && nowDesktop !== lastTabbarIsDesktop){
+    lastTabbarIsDesktop = nowDesktop;
+    buildTabbar();
+  }
+});
 window.addEventListener('online', ()=>{ if(currentUser){ showToast('Back online'); render(); } });
 window.addEventListener('offline', ()=>{ if(currentUser){ showToast('Offline - saving on this device'); render(); } });
 
